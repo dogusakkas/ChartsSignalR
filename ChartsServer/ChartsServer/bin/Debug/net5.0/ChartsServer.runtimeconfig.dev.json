@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\dogus\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\dogus\\.nuget\\packages"
+    ]
+  }
+}
