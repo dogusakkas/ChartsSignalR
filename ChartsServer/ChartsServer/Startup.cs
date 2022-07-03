@@ -1,3 +1,4 @@
+using ChartsServer.Hubs;
 using ChartsServer.Models;
 using ChartsServer.Subscription;
 using ChartsServer.Subscription.Middleware;
@@ -15,15 +16,20 @@ namespace ChartsServer
 {
     public class Startup
     {
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton < DatabaseSubscription<Satislar>>();
-            services.AddSingleton < DatabaseSubscription<Personeller>>();
+            services.AddCors(options => options.AddDefaultPolicy(policy => policy
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .SetIsOriginAllowed(x => true)
+            ));
+
+            services.AddSignalR();
+            services.AddSingleton<DatabaseSubscription<Satislar>>();
+            services.AddSingleton<DatabaseSubscription<Personeller>>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -31,16 +37,14 @@ namespace ChartsServer
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors();
             app.UseDatabaseSubscription<DatabaseSubscription<Satislar>>("Satislar");
             app.UseDatabaseSubscription<DatabaseSubscription<Satislar>>("Personeller");
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                endpoints.MapHub<SatisHub>("/satishub");
             });
         }
     }

@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using ChartsServer.Hubs;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Configuration;
 using TableDependency.SqlClient;
 
 namespace ChartsServer.Subscription
@@ -11,20 +13,23 @@ namespace ChartsServer.Subscription
     {
         // Appsettings.json verisini okuyabilmemiz için gerekli fonksiyon
         IConfiguration _configuration;
+        IHubContext<SatisHub> _hubContext;
 
         SqlTableDependency<T> _tableDependency;
 
-        public DatabaseSubscription(IConfiguration configuration)
+        public DatabaseSubscription(IConfiguration configuration, IHubContext<SatisHub> hubContext)
         {
             _configuration = configuration;
+            _hubContext = hubContext;
         }
 
         public void Configure(string tableName)
         {
-            _tableDependency = new SqlTableDependency<T>(_configuration.GetConnectionString("SQL"),tableName);
-            _tableDependency.OnChanged += (o, e) =>
-            {
+            _tableDependency = new SqlTableDependency<T>(_configuration.GetConnectionString("SQL"), tableName);
 
+            _tableDependency.OnChanged += async (o, e) =>
+            {
+                await _hubContext.Clients.All.SendAsync("receiveMessage", "Merhaba");
             };
             _tableDependency.OnError += (o, e) =>
             {

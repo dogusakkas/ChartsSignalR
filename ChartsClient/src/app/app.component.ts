@@ -9,6 +9,21 @@ import * as Highcharts from "highcharts";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
+  connection : signalR.HubConnection;
+
+constructor() {
+  this.connection = new signalR.HubConnectionBuilder()
+  .withUrl("https://localhost:44361/satishub")
+  .build();
+
+  this.connection.start();
+
+  this.connection.on("receiveMessage",message => {
+    alert(message);
+  });
+}
+
   title = 'ChartsClient';
   Highcharts : typeof Highcharts = Highcharts;
   chartOptions: Highcharts.Options = {
